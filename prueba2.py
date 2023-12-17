@@ -1,6 +1,8 @@
 import cv2
 import mediapipe as mp
 
+
+
 # Inicializar MediaPipe Hands
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(min_detection_confidence=0.7)
@@ -28,14 +30,31 @@ def is_letter_i(hand_landmarks):
         cv2.putText(image, "Letra: I", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
     
 def is_letter_s(hand_landmarks):
-    # En la letra S, el puño está cerrado
-    return all(hand_landmarks.landmark[i].y > hand_landmarks.landmark[0].y for i in range(1, 5))
+    # Puntos de referencia para la punta de los dedos y las articulaciones inferiores
+    tip_ids = [4, 8, 12, 16, 20]  # Pulgar, Índice, Medio, Anular, Meñique
+    lower_joint_ids = [2, 5, 9, 13, 17]  # Articulaciones inferiores de cada dedo
+
+    # Verificar que los dedos (excepto el pulgar) estén cerrados
+    fingers_folded = all(hand_landmarks.landmark[tip_ids[i]].y > hand_landmarks.landmark[lower_joint_ids[i]].y for i in range(1, 5))
+
+    # Verificar que el pulgar esté sobre los dedos o al menos cerca de ellos
+    thumb_over_fingers = hand_landmarks.landmark[tip_ids[0]].x > hand_landmarks.landmark[tip_ids[1]].x
+
+    return fingers_folded and thumb_over_fingers
 
 def is_letter_g(hand_landmarks):
-    # En la letra G, el índice y el pulgar están extendidos
-    return (hand_landmarks.landmark[8].y < hand_landmarks.landmark[6].y and
-            hand_landmarks.landmark[4].y < hand_landmarks.landmark[3].y and
-            all(hand_landmarks.landmark[i].y > hand_landmarks.landmark[0].y for i in [12, 16, 20]))
+    # Puntos de referencia para la punta de los dedos y las articulaciones inferiores
+    tip_ids = [4, 8, 12, 16, 20]  # Pulgar, Índice, Medio, Anular, Meñique
+    lower_joint_ids = [2, 5, 9, 13, 17]  # Articulaciones inferiores de cada dedo
+
+    # Verificar que el índice y el pulgar estén extendidos
+    index_and_thumb_extended = (hand_landmarks.landmark[tip_ids[1]].y < hand_landmarks.landmark[lower_joint_ids[1]].y and
+                                hand_landmarks.landmark[tip_ids[0]].x < hand_landmarks.landmark[lower_joint_ids[0]].x)
+
+    # Verificar que los otros dedos no estén extendidos
+    others_folded = all(hand_landmarks.landmark[tip_ids[i]].y > hand_landmarks.landmark[lower_joint_ids[i]].y for i in range(2, 5))
+
+    return index_and_thumb_extended and others_folded
 
 def is_letter_n(hand_landmarks):
     # En la letra N, el índice y el medio están extendidos
@@ -68,7 +87,7 @@ while cap.isOpened():
                 image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
             
             if is_letter_s(hand_landmarks):
-                cv2.putText(image, "Letra: N", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+                cv2.putText(image, "Letra: S", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
                  # Mostrar que es la letra S
             elif is_letter_i(hand_landmarks):
                 print("Letra: I")
