@@ -102,7 +102,7 @@ while cap.isOpened():
                 cv2.putText(image, "Letra: O", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
                 # Mostrar que es la letra O
             else:
-                cv2.putText(image, "No es ninguna letra", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+                cv2.putText(image, (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
             
                 # Mostrar que no es ninguna de estas letras
     cv2.imshow('Mano Detectada', image)
