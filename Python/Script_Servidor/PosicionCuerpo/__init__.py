@@ -35,9 +35,9 @@ def send_data_to_server(data):
 def get_landmark_coordinates(landmarks, image_width, image_height):
     if landmarks is None:
         return None
-    return [{ 
-        "x": landmark.x * image_width, 
-        "y": landmark.y * image_height, 
+    return [{
+        "x": landmark.x * image_width,
+        "y": landmark.y * image_height,
         "z": landmark.z * image_width
     } for landmark in landmarks.landmark]
 
