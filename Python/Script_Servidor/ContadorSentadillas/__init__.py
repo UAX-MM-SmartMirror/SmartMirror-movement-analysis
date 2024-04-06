@@ -80,4 +80,3 @@ with mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5) as pose
 
 cap.release()
 cv2.destroyAllWindows()
-
