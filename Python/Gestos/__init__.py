@@ -1,3 +1,4 @@
+# Faltan letras por hacer en el archivo __init__.py
 import cv2
 import mediapipe as mp
 
@@ -5,7 +6,7 @@ import mediapipe as mp
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(min_detection_confidence=0.7)
 
-
+# Funciones para identificar letras del abecedario basadas en la posición de los dedos
 def is_letter_s(hand_landmarks):
     # Puntos de referencia para la punta de los dedos y las articulaciones inferiores
     tip_ids = [4, 8, 12, 16, 20]  # Pulgar, Índice, Medio, Anular, Meñique
@@ -147,7 +148,7 @@ while cap.isOpened():
             else:
                 cv2.putText(image, ".", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
-                # Mostrar que no es ninguna de estas letras
+    # Mostrar que no es ninguna de estas letras
     cv2.imshow('Mano Detectada', image)
     if cv2.waitKey(5) & 0xFF == 27:
         break
