@@ -3,26 +3,58 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Estructura de almacenamiento para los datos recibidos
+# Lista para almacenar los datos recibidos
 data_store = []
 
-# Diccionario que mapea tipo de dato a claves esperadas
+# Diccionario: claves esperadas para cada tipo de datos.
 expected_keys_by_type = {
     "body_position": ["pose_landmarks", "face_landmarks", "left_hand_landmarks", "right_hand_landmarks"],
     "squat_counter": ["angle", "contador"],
+    "hand_signs": ["letter", "finger_coordinates"],
+    "flexiones": ["contador", "angulo_izquierdo", "angulo_derecho"]
 }
 
-# Validación de la estructura de datos esperada
+# Validamos la estructura de los datos
 def validate_data(data):
-    # Determinar el tipo de dato
-    data_type = data.get('type', 'body_position')  # Asume 'body_position' como tipo por defecto si no se especifica
-
-    # Obtener las claves esperadas para el tipo de dato
+    data_type = data.get('type', 'body_position')
     expected_keys = expected_keys_by_type.get(data_type, [])
 
-    # Verificar que todas las claves esperadas están presentes
-    return all(key in data for key in expected_keys)
+    # Verifica que todas las claves esperadas estén presentes
+    if not all(key in data for key in expected_keys):
+        return False
 
+    # Validación específica para 'squat_counter'
+    if data_type == 'squat_counter':
+        angle = data.get('angle')
+        contador = data.get('contador')
+        # Comprueba que 'angle' sea numérico y 'contador' un entero
+        if not (isinstance(angle, (int, float)) and isinstance(contador, int)):
+            return False
+
+    # Validación específica para 'hand_signs'
+    if data_type == 'hand_signs':
+        letter = data.get('letter')
+        finger_coordinates = data.get('finger_coordinates')
+        # Comprueba que 'letter' sea una cadena y 'finger_coordinates' un diccionario
+        if not (isinstance(letter, str) and isinstance(finger_coordinates, dict)):
+            return False
+        # Comprueba que las coordenadas sean números flotantes
+        for finger, coords in finger_coordinates.items():
+            if not ('x' in coords and 'y' in coords and isinstance(coords['x'], float) and isinstance(coords['y'], float)):
+                return False
+
+    # Validación específica para 'flexiones'
+    elif data_type == 'flexiones':
+        contador = data.get('contador')
+        angulo_izquierdo = data.get('angulo_izquierdo')
+        angulo_derecho = data.get('angulo_derecho')
+        if not (isinstance(contador, int) and isinstance(angulo_izquierdo, (int, float)) and isinstance(angulo_derecho,
+                                                                                                        (int, float))):
+            return False
+
+    return True
+
+# Ruta para subir datos
 @app.route('/upload', methods=['POST'])
 def upload_data():
     data = request.json
