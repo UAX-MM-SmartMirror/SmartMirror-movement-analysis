@@ -14,7 +14,7 @@ Antes de almacenar los datos recibidos, el servidor valida su estructura y conte
 
 El servidor tiene dos rutas de API principales:
 
-* **'/upload' (POST)**: Esta ruta se utiliza para que el cliente envíe datos al servidor. Los datos se reciben en formato JSON y se validan antes de almacenarse en la lista de datos. Si los datos son válidos, se agrega un sello de tiempo y se almacenan junto con el tipo de dato.
+* **'/upload' (POST)** : Esta ruta se utiliza para que el cliente envíe datos al servidor. Los datos se reciben en formato JSON y se validan antes de almacenarse en la lista de datos. Si los datos son válidos, se agrega un sello de tiempo y se almacenan junto con el tipo de dato.
 * **'/data' (GET)**: Esta ruta se utiliza para recuperar datos almacenados del servidor. El cliente puede filtrar los datos por tipo y rango de tiempo especificados en los parámetros de la consulta. Los datos filtrados se devuelven al cliente en formato JSON.
 
 ### 3. Almacenamiento de Datos
