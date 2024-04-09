@@ -11,45 +11,43 @@ expected_keys_by_type = {
     "body_position": ["pose_landmarks", "face_landmarks", "left_hand_landmarks", "right_hand_landmarks"],
     "squat_counter": ["angle", "contador"],
     "hand_signs": ["letter", "finger_coordinates"],
-    "flexiones": ["contador", "angulo_izquierdo", "angulo_derecho"]
+    "flexiones": ["contador", "angulo_izquierdo", "angulo_derecho"],
+    "biceps": ["contador", "angulo_codo"]
 }
 
-# Validamos la estructura de los datos
 def validate_data(data):
     data_type = data.get('type', 'body_position')
     expected_keys = expected_keys_by_type.get(data_type, [])
 
-    # Verifica que todas las claves esperadas estén presentes
     if not all(key in data for key in expected_keys):
         return False
 
-    # Validación específica para 'squat_counter'
     if data_type == 'squat_counter':
         angle = data.get('angle')
         contador = data.get('contador')
-        # Comprueba que 'angle' sea numérico y 'contador' un entero
         if not (isinstance(angle, (int, float)) and isinstance(contador, int)):
             return False
 
-    # Validación específica para 'hand_signs'
     if data_type == 'hand_signs':
         letter = data.get('letter')
         finger_coordinates = data.get('finger_coordinates')
-        # Comprueba que 'letter' sea una cadena y 'finger_coordinates' un diccionario
         if not (isinstance(letter, str) and isinstance(finger_coordinates, dict)):
             return False
-        # Comprueba que las coordenadas sean números flotantes
         for finger, coords in finger_coordinates.items():
             if not ('x' in coords and 'y' in coords and isinstance(coords['x'], float) and isinstance(coords['y'], float)):
                 return False
 
-    # Validación específica para 'flexiones'
-    elif data_type == 'flexiones':
+    if data_type == 'biceps':
+        contador = data.get('contador')
+        angulo = data.get('angulo_codo')
+        if not (isinstance(contador, int) and isinstance(angulo, (int, float))):
+            return False
+
+    if data_type == 'flexiones':
         contador = data.get('contador')
         angulo_izquierdo = data.get('angulo_izquierdo')
         angulo_derecho = data.get('angulo_derecho')
-        if not (isinstance(contador, int) and isinstance(angulo_izquierdo, (int, float)) and isinstance(angulo_derecho,
-                                                                                                        (int, float))):
+        if not (isinstance(contador, int) and isinstance(angulo_izquierdo, (int, float)) and isinstance(angulo_derecho, (int, float))):
             return False
 
     return True
@@ -68,7 +66,6 @@ def upload_data():
 
 @app.route('/data', methods=['GET'])
 def get_data():
-    # Filtros opcionales para tipo de dato y rango de tiempo
     data_type = request.args.get('type')
     start_time = request.args.get('start')
     end_time = request.args.get('end')
