@@ -11,7 +11,7 @@ expected_keys_by_type = {
     "body_position": ["pose_landmarks", "face_landmarks", "left_hand_landmarks", "right_hand_landmarks"],
     "squat_counter": ["angle", "contador"],
     "hand_signs": ["letter", "finger_coordinates"],
-    "flexiones": ["contador", "angulo_izquierdo", "angulo_derecho"],
+    "flexiones": ["contador", "angulo"],
     "biceps": ["contador", "angulo_codo"],
     "face_mesh": ["face_landmarks"]
 }
@@ -46,9 +46,8 @@ def validate_data(data):
 
     if data_type == 'flexiones':
         contador = data.get('contador')
-        angulo_izquierdo = data.get('angulo_izquierdo')
-        angulo_derecho = data.get('angulo_derecho')
-        if not (isinstance(contador, int) and isinstance(angulo_izquierdo, (int, float)) and isinstance(angulo_derecho, (int, float))):
+        angulo = data.get('angulo')
+        if not (isinstance(contador, int) and isinstance(angulo, (int, float))):
             return False
 
     if data_type == 'face_mesh':
@@ -58,7 +57,6 @@ def validate_data(data):
 
     return True
 
-# Ruta para subir datos
 @app.route('/upload', methods=['POST'])
 def upload_data():
     data = request.json
@@ -73,22 +71,16 @@ def upload_data():
 @app.route('/data', methods=['GET'])
 def get_data():
     data_type = request.args.get('type')
-    start_time = request.args.get('start')
-    end_time = request.args.get('end')
-
     filtered_data = data_store
 
-    # Filtrar por tipo de dato si se especifica
+    # Filtramos por tipo de dato si se especifica
     if data_type:
         filtered_data = [entry for entry in filtered_data if entry.get('type') == data_type]
 
-    # Filtrar por rango de tiempo si se especifican tanto el inicio como el fin
-    if start_time and end_time:
-        start = datetime.fromisoformat(start_time)
-        end = datetime.fromisoformat(end_time)
-        filtered_data = [entry for entry in filtered_data if start <= datetime.fromisoformat(entry['timestamp']) <= end]
-
     return jsonify(filtered_data), 200
 
+def lanzar_servidor():
+    app.run(debug=False, port=5000, use_reloader=False)
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5000, use_reloader=False)
