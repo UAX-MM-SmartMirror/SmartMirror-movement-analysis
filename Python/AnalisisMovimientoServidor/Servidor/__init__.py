@@ -26,7 +26,7 @@ def validate_data(data):
     if data_type == 'squat_counter':
         angle = data.get('angle')
         contador = data.get('contador')
-        if not (isinstance(angle, (int, float)) and isinstance(contador, int)):
+        if not (isinstance(angle, float) and isinstance(contador, int)):
             return False
 
     if data_type == 'hand_signs':
@@ -60,10 +60,11 @@ def validate_data(data):
 @app.route('/upload', methods=['POST'])
 def upload_data():
     data = request.json
+    print("Datos recibidos:", data)
     if not data or not validate_data(data):
+        print("Validación fallida para:", data)
         return jsonify({"error": "Invalid or missing data"}), 400
 
-    # Añadir un timestamp a los datos recibidos
     data['timestamp'] = datetime.utcnow().isoformat() + 'Z'
     data_store.append(data)
     return jsonify({"message": "Data uploaded successfully"}), 200
