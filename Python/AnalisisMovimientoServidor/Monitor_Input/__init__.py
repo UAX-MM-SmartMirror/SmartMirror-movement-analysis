@@ -93,7 +93,7 @@ def monitor_input():
             print("Todos los contadores han sido detenidos.")
             break  # Salir del bucle y finalizar el script
         else:
-            print("Entrada no reconocida. Ingrese 'biceps' o 'flexiones'.")
+            print("Entrada no reconocida. Ingrese 'biceps' - 'flexiones' - 'sentadillas'.")
 
 def server_up():
     server_thread = threading.Thread(target=lanzar_servidor, daemon=True)
