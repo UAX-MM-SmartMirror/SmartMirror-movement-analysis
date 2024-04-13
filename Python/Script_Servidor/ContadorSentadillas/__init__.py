@@ -11,6 +11,7 @@ class ContadorSentadillas:
         self.detener = threading.Event()
         self.thread = threading.Thread(target=self.iniciar)
         self.contador = 0
+        self.thread.daemon = True
 
     def run(self):
         if not self.thread.is_alive():

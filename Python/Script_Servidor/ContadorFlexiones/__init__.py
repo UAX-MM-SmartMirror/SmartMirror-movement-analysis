@@ -3,12 +3,15 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import requests
+from math import acos, degrees
 class ContadorFlexiones:
     def __init__(self, indicador_proceso):
         self.detener = threading.Event()
         self.indicador_proceso = indicador_proceso
         self.thread = threading.Thread(target=self.start_flexiones)
-        self.thread.daemon = True  # Asegura que el hilo se cierre si la aplicación principal termina
+        self.thread.daemon = True
+
+
 
     def start_flexiones(self):
         mp_drawing = mp.solutions.drawing_utils
@@ -33,21 +36,39 @@ class ContadorFlexiones:
                     mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
                     landmarks = results.pose_landmarks.landmark
 
-                    # Calcula los ángulos de los codos derecho e izquierdo
+                    # Ángulos del codo derecho
                     shoulder_right = np.array([landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER].x, landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER].y])
                     elbow_right = np.array([landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW].x, landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW].y])
                     wrist_right = np.array([landmarks[mp_pose.PoseLandmark.RIGHT_WRIST].x, landmarks[mp_pose.PoseLandmark.RIGHT_WRIST].y])
-                    angle_right = self.calculate_angle(shoulder_right, elbow_right, wrist_right)
 
-                    if angle_right >= 160:
+                    # Ángulos del codo izquierdo
+                    shoulder_left = np.array([landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER].x, landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER].y])
+                    elbow_left = np.array([landmarks[mp_pose.PoseLandmark.LEFT_ELBOW].x, landmarks[mp_pose.PoseLandmark.LEFT_ELBOW].y])
+                    wrist_left = np.array([landmarks[mp_pose.PoseLandmark.LEFT_WRIST].x, landmarks[mp_pose.PoseLandmark.LEFT_WRIST].y])
+
+                    # Calculamos los ángulos para ambos codos
+                    angle_left = degrees(acos(np.dot(np.array(shoulder_left) - np.array(elbow_left),
+                                                     np.array(wrist_left) - np.array(elbow_left)) /
+                                              (np.linalg.norm(
+                                                  np.array(shoulder_left) - np.array(elbow_left)) * np.linalg.norm(
+                                                  np.array(wrist_left) - np.array(elbow_left)))))
+
+                    angle_right = degrees(acos(np.dot(np.array(shoulder_right) - np.array(elbow_right),
+                                                      np.array(wrist_right) - np.array(elbow_right)) /
+                                               (np.linalg.norm(
+                                                   np.array(shoulder_right) - np.array(elbow_right)) * np.linalg.norm(
+                                                   np.array(wrist_right) - np.array(elbow_right)))))
+
+                    # Contar flexiones
+                    if angle_left >= 160 and angle_right >= 160:
                         up = True
-                    if up and angle_right <= 70:
+                    if up and (angle_left <= 70 or angle_right <= 70):
                         down = True
-                    if up and down and angle_right >= 160:
+                    if up and down and angle_left >= 160 and angle_right >= 160:
                         contador += 1
                         up = False
                         down = False
-                        self.send_data(url, contador, angle_right)
+                        self.send_data(url, contador, angle_left, angle_right)
 
                     cv2.putText(frame, f"Reps: {contador}", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
@@ -58,16 +79,8 @@ class ContadorFlexiones:
         cap.release()
         cv2.destroyAllWindows()
 
-    @staticmethod
-    def calculate_angle(a, b, c):
-        ba = a - b
-        bc = c - b
-        cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
-        angle = np.arccos(cosine_angle)
-        return np.degrees(angle)
-
-    def send_data(self, url, contador, angle):
-        data = {'type': 'flexiones', 'contador': contador, 'angulo': angle}
+    def send_data(self, url, contador, angle_left, angle_right):
+        data = {'type': 'flexiones', 'contador': contador, 'angulo_izquierdo': angle_left, 'angulo_derecho': angle_right}
         try:
             response = requests.post(url, json=data)
             print("Data sent to server:", data)

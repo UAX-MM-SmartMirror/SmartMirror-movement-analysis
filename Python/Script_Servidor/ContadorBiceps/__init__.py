@@ -9,7 +9,7 @@ class ContadorBiceps:
         self.detener = threading.Event()
         self.indicador_proceso = indicador_proceso
         self.thread = threading.Thread(target=self.start_biceps)
-        self.thread.daemon = True  # Asegura que el hilo se cierre si la aplicación principal termina
+        self.thread.daemon = True  # Aseguramos que el hilo se cierre si la aplicación principal termina
 
     def start_biceps(self):
         mp_drawing = mp.solutions.drawing_utils

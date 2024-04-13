@@ -11,7 +11,7 @@ expected_keys_by_type = {
     "body_position": ["pose_landmarks", "face_landmarks", "left_hand_landmarks", "right_hand_landmarks"],
     "squat_counter": ["angle", "contador"],
     "hand_signs": ["letter", "finger_coordinates"],
-    "flexiones": ["contador", "angulo"],
+    "flexiones": ["contador", "angulo_izquierdo", "angulo_derecho"],
     "biceps": ["contador", "angulo_codo"],
     "face_mesh": ["face_landmarks"]
 }
@@ -46,8 +46,11 @@ def validate_data(data):
 
     if data_type == 'flexiones':
         contador = data.get('contador')
-        angulo = data.get('angulo')
-        if not (isinstance(contador, int) and isinstance(angulo, (int, float))):
+        angulo_izq = data.get('angulo_izquierdo')
+        angulo_der = data.get('angulo_derecho')
+        #angulo_body_izq = data.get('angulo_cuerpo_izquierdo')
+        #angulo_body_der = data.get('angulo_cuerpo_derecho')
+        if not (isinstance(contador, int) and isinstance(angulo_izq, (int, float)) and isinstance(angulo_der, (int, float))):
             return False
 
     if data_type == 'face_mesh':
