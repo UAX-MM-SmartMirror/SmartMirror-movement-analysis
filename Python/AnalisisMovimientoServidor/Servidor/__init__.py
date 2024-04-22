@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from datetime import datetime
 
+from Python.AnalisisMovimientoServidor.VariablesComun import tipo_ejercicio
+
 app = Flask(__name__)
 
 # Lista para almacenar los datos recibidos
@@ -53,13 +55,19 @@ def validate_data(data):
         if not (isinstance(contador, int) and isinstance(angulo_izq, (int, float)) and isinstance(angulo_der, (int, float))):
             return False
 
+    if data_type == 'analisis_movimiento':
+        biceps = data.get('biceps')
+        flexiones = data.get('flexiones')
+        sentadillas = data.get('sentadillas')
+        if not (isinstance(biceps, int) and isinstance(flexiones, int) and isinstance(sentadillas, int)):
+            return False
+
     if data_type == 'face_mesh':
         face_landmarks = data.get('face_landmarks')
         if not (isinstance(face_landmarks, list)):
             return False
 
     return True
-
 @app.route('/upload', methods=['POST'])
 def upload_data():
     data = request.json
