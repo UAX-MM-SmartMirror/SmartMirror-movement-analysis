@@ -1,13 +1,23 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from datetime import datetime
 
 from Python.AnalisisMovimientoServidor.VariablesComun import tipo_ejercicio
+import time
 
 app = Flask(__name__)
+app.config ['DEBUG'] = False
+
+@app.after_request
+def after_request(response):
+    header = response.headers
+    header['Access-Control-Allow-Origin'] = '*'
+    header['Access-Control-Allow-Methods'] = 'GET, POST'
+    header['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    return response
+
 
 # Lista para almacenar los datos recibidos
 data_store = []
-
 # Diccionario: claves esperadas para cada tipo de datos.
 expected_keys_by_type = {
     "body_position": ["pose_landmarks", "face_landmarks", "left_hand_landmarks", "right_hand_landmarks"],
@@ -17,6 +27,7 @@ expected_keys_by_type = {
     "biceps": ["contador", "angulo_codo"],
     "face_mesh": ["face_landmarks"]
 }
+
 
 def validate_data(data):
     data_type = data.get('type', 'body_position')
@@ -37,7 +48,8 @@ def validate_data(data):
         if not (isinstance(letter, str) and isinstance(finger_coordinates, dict)):
             return False
         for finger, coords in finger_coordinates.items():
-            if not ('x' in coords and 'y' in coords and isinstance(coords['x'], float) and isinstance(coords['y'], float)):
+            if not ('x' in coords and 'y' in coords and isinstance(coords['x'], float) and isinstance(coords['y'],
+                                                                                                      float)):
                 return False
 
     if data_type == 'biceps':
@@ -50,9 +62,10 @@ def validate_data(data):
         contador = data.get('contador')
         angulo_izq = data.get('angulo_izquierdo')
         angulo_der = data.get('angulo_derecho')
-        #angulo_body_izq = data.get('angulo_cuerpo_izquierdo')
-        #angulo_body_der = data.get('angulo_cuerpo_derecho')
-        if not (isinstance(contador, int) and isinstance(angulo_izq, (int, float)) and isinstance(angulo_der, (int, float))):
+        # angulo_body_izq = data.get('angulo_cuerpo_izquierdo')
+        # angulo_body_der = data.get('angulo_cuerpo_derecho')
+        if not (isinstance(contador, int) and isinstance(angulo_izq, (int, float)) and isinstance(angulo_der, (int,
+                                                                                                               float))):
             return False
 
     if data_type == 'analisis_movimiento':
@@ -68,6 +81,8 @@ def validate_data(data):
             return False
 
     return True
+
+
 @app.route('/upload', methods=['POST'])
 def upload_data():
     data = request.json
@@ -83,16 +98,30 @@ def upload_data():
 @app.route('/data', methods=['GET'])
 def get_data():
     data_type = request.args.get('type')
+    print(f"Tipo de dato recibido: {data_type}")
     filtered_data = data_store
 
-    # Filtramos por tipo de dato si se especifica
-    if data_type:
-        filtered_data = [entry for entry in filtered_data if entry.get('type') == data_type]
+    # Espera hasta que haya datos disponibles
+    while not filtered_data:
+        time.sleep(0.1)  # Espera 0.1 segundos antes de comprobar de nuevo
+        filtered_data = [entry for entry in data_store if entry.get('type') == data_type]
 
     return jsonify(filtered_data), 200
+
+@app.route('/start/<exercise_type>', methods=['POST', 'GET'])
+def start_exercise(exercise_type):
+    tipo_ejercicio.put(exercise_type)
+    print(f"Tipo de ejercicio: {exercise_type}")
+    return jsonify({"message": f"{exercise_type.capitalize()}, started"}), 200
+
+@app.route('/start/stop', methods=['POST'])
+def stop():
+    tipo_ejercicio['type'] = 'stop'
+    return jsonify({"message": "All counters stopped"}), 200
 
 def lanzar_servidor():
     app.run(debug=False, port=5000, use_reloader=False)
 
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000, use_reloader=False)
+    lanzar_servidor()
