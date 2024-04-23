@@ -1,29 +1,15 @@
-# 1. SmartMirror Movement Analysis Server
+# Servidor de Monitoreo de Ejercicios
 
-Este servidor Flask se utiliza para recibir datos de movimiento desde un cliente y almacenarlos para su posterior análisis. El cliente puede enviar datos de diferentes tipos, como la posición corporal, el conteo de sentadillas, los signos de mano, etc. El servidor valida los datos recibidos y los almacena en una lista, junto con un registro de tiempo.
+Este proyecto implementa un servidor para recibir, validar y almacenar datos relacionados con ejercicios enviados desde aplicaciones cliente. Soporta varios tipos de ejercicios y maneja diferentes tipos de entradas de datos relacionados con movimientos corporales.
 
-## Algoritmo y Funcionamiento
+## Características
 
-El servidor consta de las siguientes partes principales:
+- **Validación de Datos:** Asegura que todos los datos entrantes coincidan con los formatos esperados y contengan los campos requeridos según el tipo de ejercicio.
+- **Compartición de Recursos de Origen Cruzado (CORS):** Configurado para aceptar solicitudes de cualquier origen.
+- **Monitoreo de Ejercicios:** Soporta ejercicios como sentadillas, curls de bíceps y flexiones, y puede manejar dinámicamente datos entrantes basados en el tipo de ejercicio.
+- **Procesamiento Concurrente:** Utiliza hilos para gestionar procesos de monitoreo de ejercicios sin bloquear las operaciones principales del servidor.
 
-### 1. Validación de Datos
+## Ejecución
 
-Antes de almacenar los datos recibidos, el servidor valida su estructura y contenido para garantizar que cumplan con el formato esperado y contengan la información necesaria. Se utilizan diccionarios de claves esperadas para cada tipo de dato para verificar que se proporcionen todos los campos necesarios para cada tipo de dato. Además, se realizan comprobaciones específicas según el tipo de dato para asegurarse de que los valores sean del tipo correcto.
+Para ejecutar este servidor, necesitarás Python 3.x y Flask.
 
-### 2. Rutas de API
-
-El servidor tiene dos rutas de API principales:
-
-* **'/upload' (POST)** : Esta ruta se utiliza para que el cliente envíe datos al servidor. Los datos se reciben en formato JSON y se validan antes de almacenarse en la lista de datos. Si los datos son válidos, se agrega un sello de tiempo y se almacenan junto con el tipo de dato.
-* **'/data' (GET)**: Esta ruta se utiliza para recuperar datos almacenados del servidor. El cliente puede filtrar los datos por tipo y rango de tiempo especificados en los parámetros de la consulta. Los datos filtrados se devuelven al cliente en formato JSON.
-
-### 3. Almacenamiento de Datos
-
-Los datos recibidos y validados se almacenan en una lista llamada `data_store`. Cada entrada en esta lista contiene el tipo de dato, los datos específicos y un sello de tiempo que indica cuándo se recibió el dato.
-
-## Ejecución del Servidor
-
-Para ejecutar el servidor, simplemente ejecute el script Python y el servidor se iniciará en el puerto 5000 en modo de depuración.
-
-
-# 2. Scripts Del Servidor
